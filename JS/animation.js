@@ -1,15 +1,16 @@
+if (!localStorage.getItem("loadingScreenShown")) {
+    // Jalankan animasi loading
     gsap.timeline()
         .to("#percentage", {
             duration: 3,
-            innerText: 100, // Gunakan angka tanpa %
+            innerText: 100,
             snap: { innerText: 1 },
             modifiers: {
                 innerText: function(value) {
-                    return Math.round(value) + "%"; // Tambahkan % di sini
+                    return Math.round(value) + "%";
                 }
             },
             onUpdate: function() {
-                // Update alternatif untuk progress
                 const progress = Math.round(this.progress() * 100);
                 document.getElementById('percentage').innerText = progress + "%";
             }
@@ -47,12 +48,19 @@
             duration: 1,
             opacity: 0,
             delay: 0.5,
-            onComplete: function() {
+            onComplete: function () {
                 document.getElementById('loading-screen').style.display = 'none';
-                gsap.to("#content", { 
-                    duration: 1, 
+                gsap.to("#content", {
+                    duration: 1,
                     opacity: 1,
-                    ease: "power2.out" 
+                    ease: "power2.out"
                 });
+                // Simpan status ke localStorage agar tidak tampil lagi
+                localStorage.setItem("loadingScreenShown", "true");
             }
         });
+} else {
+    // Langsung sembunyikan loading screen dan tampilkan konten
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('content').style.opacity = 1;
+}
