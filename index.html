@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ukiuki - Tadoku Sample Design</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #fff5f6;
+        }
+        #mobile-menu {
+    will-change: transform;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+        .sakura-bg {
+            background-image: url('/img/image.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -35px;
+    top: 15px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #f9a8d4;
+    border: 3px solid #f472b6;
+    z-index: 1;
+}
+/* Heading section */
+h3.text-2xl.font-bold {
+    padding: 0 1rem;
+    display: inline-block;
+    background: white;
+}
+
+@media (max-width: 768px) {
+    .timeline-item::before {
+        left: -25px;
+        top: 10px;
+        width: 16px;
+        height: 16px;
+    }
+    
+   #timeline:after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 0;
+        transform: translateX(-50%);
+        width: 1px;
+        height: 100%;
+        background: #fbcfe8;
+        z-index: 0; /* Pastikan garis di belakang konten */
+    }
+}
+
+@media (max-width: 640px) {
+    #timeline:after {
+        display: none;
+    }
+}
+
+        @media (max-width: 768px) {
+            .timeline-item::before {
+                left: -25px;
+            }
+           
+        }
+    </style>
+    <style>
+       
+        #loading-screen {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: #ffe6f2; /* Warna sakura muda */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-content {
+            text-align: center;
+            position: relative;
+        }
+
+        #logo {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            animation: float 2s ease-in-out infinite;
+        }
+
+        #percentage {
+            font-size: 24px;
+            color: #ff69b4;
+            font-weight: bold;
+        }
+
+        .decorations div {
+            position: absolute;
+            background: linear-gradient(45deg, #ff69b4, #ffb6c1);
+            border-radius: 50%;
+        }
+
+        .decoration1 { width: 20px; height: 20px; top: 20%; left: 20%; }
+        .decoration2 { width: 30px; height: 30px; top: 70%; right: 15%; }
+        .decoration3 { width: 25px; height: 25px; bottom: 30%; left: 10%; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        #content {
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="decorations">
+            <div class="decoration1"></div>
+            <div class="decoration2"></div>
+            <div class="decoration3"></div>
+        </div>
+        <div class="loading-content">
+            <img src="https://www.ukiukitadoku.com/build/images/logo-dark.png" style="width: 300px;" id="logo" alt="Logo">
+            <div id="percentage">0</div>
+        </div>
+    </div>
+    <div id="content">
+        <nav class="bg-pink-50 bg-opacity-80 backdrop-blur-md fixed w-full z-50 shadow-sm">
+            <div class="max-w-6xl mx-auto px-4">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-2">
+                        <img src="https://www.ukiukitadoku.com/build/images/logo-dark.png" alt="Website Logo" class="w-32 md:w-40">
+                    </div>
+                    
+                    <!-- Desktop Menu -->
+                    <div class="hidden md:flex space-x-8">
+                        <a href="#home" class="text-pink-600 hover:text-pink-800 transition-colors duration-300">Home</a>
+                        <a href="#about" class="text-pink-600 hover:text-pink-800 transition-colors duration-300">About</a>
+                        <a href="#features" class="text-pink-600 hover:text-pink-800 transition-colors duration-300">Feature</a>
+                        <a href="#timeline" class="text-pink-600 hover:text-pink-800 transition-colors duration-300">Guides</a>
+                        <a href="#contact" class="text-pink-600 hover:text-pink-800 transition-colors duration-300">Contact</a>
+                    </div>
+                    
+                    <!-- Mobile menu button -->
+                    <div class="md:hidden">
+                        <button id="menu-btn" class="text-pink-700 focus:outline-none">
+                            <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="fixed inset-y-0 right-0 w-64 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-[60]">
+            <div class="p-6 h-full flex flex-col">
+                <div class="flex justify-between items-center mb-8">
+                    <img src="https://www.ukiukitadoku.com/build/images/logo-dark.png" alt="Logo" class="w-32">
+                    <button id="close-btn" class="text-pink-700">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <nav class="flex-1 space-y-4 overflow-y-auto">
+                    <a href="#home" class="block py-3 px-4 text-pink-700 rounded-lg hover:bg-pink-50 transition-colors">Home</a>
+                    <a href="#about" class="block py-3 px-4 text-pink-700 rounded-lg hover:bg-pink-50 transition-colors">About</a>
+                    <a href="#features" class="block py-3 px-4 text-pink-700 rounded-lg hover:bg-pink-50 transition-colors">Feature</a>
+                    <a href="#timeline" class="block py-3 px-4 text-pink-700 rounded-lg hover:bg-pink-50 transition-colors">Guides</a>
+                    <a href="#contact" class="block py-3 px-4 text-pink-700 rounded-lg hover:bg-pink-50 transition-colors">Contact</a>
+                </nav>
+            </div>
+        </div>
+        <!-- Backdrop -->
+        <div id="backdrop" class="fixed inset-0 bg-black/30 z-[55] hidden"></div>
+        <style>
+            /* Custom CSS untuk animasi lebih smooth */
+            #mobile-menu {
+                will-change: transform;
+            }
+            
+            /* Untuk mencegah scroll saat menu terbuka */
+            .no-scroll {
+                overflow: hidden;
+            }
+        </style>
+        
+            <!-- Hero Section -->
+            <section id="home" class="sakura-bg min-h-screen flex items-center pt-20 pb-10">
+                <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center">
+                    <div class="md:w-1/2 mb-10 md:mb-0">
+                        <h1 class="text-4xl md:text-6xl font-bold text-pink-800 mb-4 leading-tight">
+                          
+                        うきうき多読 
+                        </h1>
+                        <p class="text-lg md:text-xl text-pink-700 mb-8">
+                        Ukiuki Tadoku
+                        Media Extensive Reading berbasis Flipped Learning untuk pembelajar bahasa Jepang.
+                        Belajar fleksibel, baca lebih banyak, pantau progres otomatis.
+                        </p>
+                        <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                            <a href="#about" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:scale-105 text-center">
+                                Learn More
+                            </a>
+                           
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 flex justify-center">
+                        <img src="img/icon1.png" alt="Japanese Girl with Sakura" class="w-full max-w-md rounded-lg shadow-xl transform rotate-2 hover:rotate-0 transition duration-500">
+                    </div>
+                </div>
+            </section>
+        
+            <!-- About Section -->
+            <section id="about" class="py-20 bg-white bg-opacity-90">
+                <div class="max-w-6xl mx-auto px-4">
+                    <div class="text-center mb-16">
+                        <h2 class="text-3xl md:text-4xl font-bold text-pink-700 mb-4">
+                         About
+                        </h2>
+                        <div class="w-24 h-1 bg-pink-400 mx-auto"></div>
+                    </div>
+                    
+                    <div class="flex flex-col md:flex-row items-center">
+                        <div class="md:w-1/2 mb-10 md:mb-0 md:pr-10">
+                            <img src="/img/cute.png" alt="Sakura Temple" class="rounded-lg shadow-xl w-full">
+                        </div>
+                        <div class="md:w-1/2">
+                            <h3 class="text-2xl font-semibold text-pink-700 mb-4">
+                               初級読解の学習 うきうき多読
+                            </h3>
+                            <p class="text-gray-700 mb-6 text-start xl:text-justify">
+                                Ukiuki Tadoku merupakan web (media) yang mendukung pelaksanaan model pembelajaran Extensive Reading berbasis Flipped Learning bagi pembelajar bahasa Jepang. Ukiuki Tadoku dikembangkan untuk memenuhi kebutuhan mahasiswa terhadap paparan input yang banyak (kuantitas) dari bahasa Jepang untuk meningkatkan pengetahuan dan keterampilan mahasiswa khususnya dalam membaca. Ukiuki Tadoku mampu memfasilitasi model pembelajaran Extensive Reading berbasis Flipped Learning dalam hal menciptakan lingkungan belajar yang fleksibel (sebagai smart-enviroment), sehingga kuantitas membaca dapat ditingkatkan. Kemudian, semua kinerja pembelajar akan terekam secara otomatis dalam Ukiuki Tadoku (sebagai e-portofolio), yang memudahkan dalam melihat progress yang dilakukan oleh pembelajar selama pembelajaran.
+                            </p>
+                            <p class="text-gray-700 mb-6 text-start xl:text-justify">
+                                 Pada model pembelajaran ini, pembelajar diberikan kebebasan untuk menentukan sediri materi
+                                teks/bacaan yang disediakan dalam Ukiuki Tadoku, tentunya sesuai dengan minat dan tingkat
+                                kemampuan mereka (kualitas). Membaca dan memahami secara individu sebuah teks/wacana melatih
+                                pembelajar dalam mengkonstruksi pengetahuan terkait bahasa Jepang, serta meningkatkan
+                                keterampailan membaca mereka agar menumbuhkan rasa percaya diri dalam membaca. Dengan demikian,
+                                nantinya akan lahir pembaca yang mandiri.
+                            </p>
+                            
+                        </div>
+                    </div>
+                </div>
+            </section>
+        
+            <!-- Features Section -->
+            <section id="features" class="py-20" style="background-image: url('/img/image.png');">
+                <div class="max-w-6xl mx-auto px-4">
+                    <div class="text-center mb-16">
+                        <h2 class="text-3xl md:text-4xl font-bold text-pink-700 mb-4">
+                         Bagian-Bagian Dalam UkiUki Tadoku
+                        </h2>
+                        <div class="w-24 h-1 bg-pink-400 mx-auto"></div>
+                    </div>
+                    
+                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Feature 1 -->
+                    <div class="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ease-out overflow-hidden hover:transform hover:scale-[1.02]">
+                        <div class="relative h-52 overflow-hidden">
+                            <img src="img/feature1.png" alt="Virtual Hanami" 
+                                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/20 to-transparent"></div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-start mb-3">
+                                <div class="bg-pink-100 p-3 rounded-lg mr-4">
+                                    <span class="text-2xl font-bold text-pink-600">1</span>
+                                </div>
+                                <h3 class="text-pink-600 font-semibold text-xl tracking-tight">Pengenalan Web Ukiuki Tadoku</h3>
+                            </div>
+                            <p class="text-gray-600 leading-relaxed text-justify">
+                                Bagian yang memberikan penjelasan terkait web sebagai media penunjang model pembelajaran, bagian-bagian web, serta langkah-langkah penggunaan web yang dikembangkan.
+                            </p>
+                        </div>
+                    </div>
+                    <!-- Feature 2 -->
+                    <div class="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ease-out overflow-hidden hover:transform hover:scale-[1.02]">
+                        <div class="relative h-52 overflow-hidden">
+                            <img src="img/feature2.png" alt="Virtual Hanami" 
+                                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/20 to-transparent"></div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-start mb-3">
+                                <div class="bg-pink-100 p-3 rounded-lg mr-4">
+                                    <span class="text-2xl font-bold text-pink-600">2</span>
+                                </div>
+                                <h3 class="text-pink-600 font-semibold text-xl tracking-tight">Kegiatan Membaca</h3>
+                            </div>
+                            <p class="text-gray-600 leading-relaxed text-justify">
+                                Bagian yang menyediakan berbagai teks/bacaan. Penyediaan teks/bacaan yang banyak memungkinkan pembelajar memilih sesuai dengan minat dan kemampuan.
+                            </p>
+                        </div>
+                    </div>
+                    <!-- Feature 3 -->
+                    <div class="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ease-out overflow-hidden hover:transform hover:scale-[1.02]">
+                        <div class="relative h-52 overflow-hidden">
+                            <img src="img/feature3.png" alt="Virtual Hanami" 
+                                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/20 to-transparent"></div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-start mb-3">
+                                <div class="bg-pink-100 p-3 rounded-lg mr-4">
+                                    <span class="text-2xl font-bold text-pink-600">3</span>
+                                </div>
+                                <h3 class="text-pink-600 font-semibold text-xl tracking-tight">Penilaian terhadap teks/wacana oleh pembelajar</h3>
+                            </div>
+                            <p class="text-gray-600 leading-relaxed text-justify">
+                                Bagian ini memunculkan skala penilaian terhadap teks/wacana yang telah dibaca oleh pembelajar
+                            </p>
+                        </div>
+                    </div>
+                    <!-- Feature 4 -->
+                    <div class="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ease-out overflow-hidden hover:transform hover:scale-[1.02]">
+                        <div class="relative h-52 overflow-hidden">
+                            <img src="img/feature4.png" alt="Virtual Hanami" 
+                                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/20 to-transparent"></div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-start mb-3">
+                                <div class="bg-pink-100 p-3 rounded-lg mr-4">
+                                    <span class="text-2xl font-bold text-pink-600">4</span>
+                                </div>
+                                <h3 class="text-pink-600 font-semibold text-xl tracking-tight">Kegiatan Setelah Membaca</h3>
+                            </div>
+                            <p class="text-gray-600 leading-relaxed text-justify">
+                                Bagian ini mencakup tiga kegiatan: resume, kuis, dan refleksi. Pembelajar membuat ringkasan dari bacaan, menjawab kuis untuk mengukur pemahaman, lalu melakukan refleksi berdasarkan hasil resume dan kuis.
+                            </p>
+                        </div>
+                    </div>
+                    <!-- Feature 5 -->
+                    <div class="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ease-out overflow-hidden hover:transform hover:scale-[1.02]">
+                        <div class="relative h-52 overflow-hidden">
+                            <img src="img/feature5.png" alt="Virtual Hanami" 
+                                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/20 to-transparent"></div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-start mb-3">
+                                <div class="bg-pink-100 p-3 rounded-lg mr-4">
+                                    <span class="text-2xl font-bold text-pink-600">5</span>
+                                </div>
+                                <h3 class="text-pink-600 font-semibold text-xl tracking-tight">Kegiatan Lanjutan</h3>
+                            </div>
+                            <p class="text-gray-600 leading-relaxed text-justify">
+                               Bagian yang memberikan akses kepada pembelajar untuk mengunggah hasil kegiatan lanjutan yang
+                                dipilih, misalnya file pembuatan kalimat, video presentasi dan lain-lain.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </section>
+        
+           <!-- Timeline Section -->
+        <section id="timeline" class="py-20 bg-white">
+            <div class="max-w-6xl mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-pink-700 mb-4">
+                        Langkah-langkah Penggunaan Web Ukiuki Tadoku
+                    </h2>
+                    <div class="w-24 h-1 bg-pink-400 mx-auto"></div>
+                </div>
+        
+                <div class="relative">
+                    <!-- Timeline line -->
+                    <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-1 bg-pink-200 transform -translate-x-1/2"></div>
+                    
+                    <!-- Timeline items -->
+                    <div class="space-y-16">
+                        <!-- Di dalam -->
+                        <div class="space-y-12">
+                            <h3 class="text-2xl font-bold text-pink-600 mb-8 text-center">DI DALAM KELAS</h3>
+                            
+                            <!-- Item 1-6 -->
+                            <div class="timeline-item relative md:flex justify-between items-center" data-number="1">
+                                <div class="md:w-5/12 mb-8 md:mb-0 md:pr-10 text-right">
+                                    <h4 class="font-semibold text-lg mb-2">Membaca Pengenalan Bagian Ukiuki Tadoku</h4>
+                                </div>
+                                <div class="hidden md:block md:w-2/12 flex justify-center">
+                                    <div class="h-12 w-12 rounded-full bg-pink-100 border-4 border-pink-300 flex items-center justify-center text-2xl font-bold text-pink-700">
+                                        1
+                                    </div>
+                                </div>
+                                <div class="md:w-5/12 md:pl-10">
+                                    <img src="img/feature5.png" alt="Item 1" class="rounded-xl shadow-lg w-full h-48 object-cover border-4 border-pink-100">
+                                </div>
+                            </div>
+        
+                            <!-- Item 2 -->
+                            <div class="timeline-item relative md:flex justify-between items-center md:flex-row-reverse" data-number="2">
+                                <div class="md:w-5/12 mb-8 md:mb-0 md:pl-10 text-left">
+                                    <h4 class="font-semibold text-lg mb-2">Mengerjakan Pre-test</h4>
+                                </div>
+                                <div class="hidden md:block md:w-2/12 flex justify-center">
+                                    <div class="h-12 w-12 rounded-full bg-pink-100 border-4 border-pink-300 flex items-center justify-center text-2xl font-bold text-pink-700">
+                                        2
+                                    </div>
+                                </div>
+                                <div class="md:w-5/12 md:pr-10">
+                                    <img src="img/feature4.png" alt="Item 2" class="rounded-xl shadow-lg w-full h-48 object-cover border-4 border-pink-100">
+                                </div>
+                            </div>
+        
+                        </div>
+        
+                        <!-- Di luar -->
+                        <div class="space-y-12">
+                            <h3 class="text-2xl font-bold text-pink-600 mb-8 text-center">DI LUAR KELAS</h3>
+                            
+                            <!-- Item 1 -->
+                            <div class="timeline-item relative md:flex justify-between items-center" data-number="1">
+                                <div class="md:w-5/12 mb-8 md:mb-0 md:pr-10 text-right">
+                                    <h4 class="font-semibold text-lg mb-2">Memilih Teks/Wacana</h4>
+                                </div>
+                                <div class="hidden md:block md:w-2/12 flex justify-center">
+                                    <div class="h-12 w-12 rounded-full bg-pink-100 border-4 border-pink-300 flex items-center justify-center text-2xl font-bold text-pink-700">
+                                      1
+                                    </div>
+                                </div>
+                                <div class="md:w-5/12 md:pl-10">
+                                    <img src="timeline/diluar1.png" alt="Item 7" class="rounded-xl shadow-lg w-full h-48 object-cover border-4 border-pink-100">
+                                </div>
+                            </div>
+        
+                            <!-- Item 2-->
+                            <div class="timeline-item relative md:flex justify-between items-center md:flex-row-reverse" data-number="2">
+                                <div class="md:w-5/12 mb-8 md:mb-0 md:pl-10 text-left">
+                                    <h4 class="font-semibold text-lg mb-2">Membaca</h4>
+                                </div>
+                                <div class="hidden md:block md:w-2/12 flex justify-center">
+                                    <div class="h-12 w-12 rounded-full bg-pink-100 border-4 border-pink-300 flex items-center justify-center text-2xl font-bold text-pink-700">
+                                        2
+                                    </div>
+                                </div>
+                                <div class="md:w-5/12 md:pr-10">
+                                    <img src="timeline/diluar2.png" alt="Item 8" class="rounded-xl shadow-lg w-full h-48 object-cover border-4 border-pink-100">
+                                </div>
+                            </div>
+                            <!-- Item 1 -->
+                            <div class="timeline-item relative md:flex justify-between items-center" data-number="1">
+                                <div class="md:w-5/12 mb-8 md:mb-0 md:pr-10 text-right">
+                                    <h4 class="font-semibold text-lg mb-2">Menilai Teks/Wacana</h4>
+                                </div>
+                                <div class="hidden md:block md:w-2/12 flex justify-center">
+                                    <div class="h-12 w-12 rounded-full bg-pink-100 border-4 border-pink-300 flex items-center justify-center text-2xl font-bold text-pink-700">
+                                      3
+                                    </div>
+                                </div>
+                                <div class="md:w-5/12 md:pl-10">
+                                    <img src="timeline/diluar3.png" alt="Item 7" class="rounded-xl shadow-lg w-full h-48 object-cover border-4 border-pink-100">
+                                </div>
+                            </div>
+        
+                            <!-- Item 2-->
+                            <div class="timeline-item relative md:flex justify-between items-center md:flex-row-reverse" data-number="2">
+                                <div class="md:w-5/12 mb-8 md:mb-0 md:pl-10 text-left">
+                                    <h4 class="font-semibold text-lg mb-2">Membuat Resume</h4>
+                                </div>
+                                <div class="hidden md:block md:w-2/12 flex justify-center">
+                                    <div class="h-12 w-12 rounded-full bg-pink-100 border-4 border-pink-300 flex items-center justify-center text-2xl font-bold text-pink-700">
+                                        4
+                                    </div>
+                                </div>
+                                <div class="md:w-5/12 md:pr-10">
+                                    <img src="timeline/diluar4.png" alt="Item 8" class="rounded-xl shadow-lg w-full h-48 object-cover border-4 border-pink-100">
+                                </div>
+                            </div>
+                            <!-- Item 1 -->
+                            <div class="timeline-item relative md:flex justify-between items-center" data-number="1">
+                                <div class="md:w-5/12 mb-8 md:mb-0 md:pr-10 text-right">
+                                    <h4 class="font-semibold text-lg mb-2">Mengerjakan Quiz</h4>
+                                </div>
+                                <div class="hidden md:block md:w-2/12 flex justify-center">
+                                    <div class="h-12 w-12 rounded-full bg-pink-100 border-4 border-pink-300 flex items-center justify-center text-2xl font-bold text-pink-700">
+                                      5
+                                    </div>
+                                </div>
+                                <div class="md:w-5/12 md:pl-10">
+                                    <img src="timeline/diluar5.png" alt="Item 7" class="rounded-xl shadow-lg w-full h-48 object-cover border-4 border-pink-100">
+                                </div>
+                            </div>
+        
+                            <!-- Item 2-->
+                            <div class="timeline-item relative md:flex justify-between items-center md:flex-row-reverse" data-number="2">
+                                <div class="md:w-5/12 mb-8 md:mb-0 md:pl-10 text-left">
+                                    <h4 class="font-semibold text-lg mb-2">Mengerjakan Refleksi</h4>
+                                </div>
+                                <div class="hidden md:block md:w-2/12 flex justify-center">
+                                    <div class="h-12 w-12 rounded-full bg-pink-100 border-4 border-pink-300 flex items-center justify-center text-2xl font-bold text-pink-700">
+                                        6
+                                    </div>
+                                </div>
+                                <div class="md:w-5/12 md:pr-10">
+                                    <img src="timeline/diluar6.png" alt="Item 8" class="rounded-xl shadow-lg w-full h-48 object-cover border-4 border-pink-100">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Di dalam last -->
+                        <div class="space-y-12">
+                            <h3 class="text-2xl font-bold text-pink-600 mb-8 text-center">DI DALAM KELAS</h3>
+                            
+                            <!-- Item 1-6 -->
+                            <div class="timeline-item relative md:flex justify-between items-center" data-number="1">
+                                <div class="md:w-5/12 mb-8 md:mb-0 md:pr-10 text-right">
+                                    <h4 class="font-semibold text-lg mb-2">Kegiatan Lanjutan</h4>
+                                </div>
+                                <div class="hidden md:block md:w-2/12 flex justify-center">
+                                    <div class="h-12 w-12 rounded-full bg-pink-100 border-4 border-pink-300 flex items-center justify-center text-2xl font-bold text-pink-700">
+                                        1
+                                    </div>
+                                </div>
+                                <div class="md:w-5/12 md:pl-10">
+                                    <img src="timeline/didalam1.png" alt="Item 1" class="rounded-xl shadow-lg w-full h-48 object-cover border-4 border-pink-100">
+                                </div>
+                            </div>
+        
+                            <!-- Item 2 -->
+                            <div class="timeline-item relative md:flex justify-between items-center md:flex-row-reverse" data-number="2">
+                                <div class="md:w-5/12 mb-8 md:mb-0 md:pl-10 text-left">
+                                    <h4 class="font-semibold text-lg mb-2">Mengerjakan Post-test Tengah semester/Akhir Semester</h4>
+                                </div>
+                                <div class="hidden md:block md:w-2/12 flex justify-center">
+                                    <div class="h-12 w-12 rounded-full bg-pink-100 border-4 border-pink-300 flex items-center justify-center text-2xl font-bold text-pink-700">
+                                        2
+                                    </div>
+                                </div>
+                                <div class="md:w-5/12 md:pr-10">
+                                    <img src="timeline/didalam2.png" alt="Item 2" class="rounded-xl shadow-lg w-full h-48 object-cover border-4 border-pink-100">
+                                </div>
+                            </div>
+        
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        
+        <!-- Contact Section -->
+        <section id="contact" class="py-20"  style="background-image: url('/img/image.png');">
+            <div class="max-w-6xl mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-pink-700 mb-4">
+                        Contact Us
+                    </h2>
+                    <div class="w-24 h-1 bg-pink-400 mx-auto"></div>
+                </div>
+                
+                <div class="flex flex-col items-center">
+                    <!-- Logo -->
+                    <div class="mb-5 flex justify-center">
+                        <img src="https://www.ukiukitadoku.com/build/images/logo-dark.png" 
+                             alt="Website Logo" 
+                             class="w-48 h-48 object-contain">
+                    </div>
+                    
+                    <!-- Form -->
+                    <div class="w-full max-w-2xl">
+                        <form class="bg-white p-8 rounded-2xl shadow-xl">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="mb-4">
+                                    <label for="name" class="block text-gray-700 font-medium mb-2">Full Name</label>
+                                    <input type="text" id="name" 
+                                           class="w-full px-4 py-3 border-2 border-pink-100 rounded-xl focus:outline-none focus:border-pink-300 transition-colors">
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="email" class="block text-gray-700 font-medium mb-2">Email Address</label>
+                                    <input type="email" id="email" 
+                                           class="w-full px-4 py-3 border-2 border-pink-100 rounded-xl focus:outline-none focus:border-pink-300 transition-colors">
+                                </div>
+                            </div>
+        
+                            <div class="mb-6">
+                                <label for="message" class="block text-gray-700 font-medium mb-2">Message</label>
+                                <textarea id="message" rows="4" 
+                                          class="w-full px-4 py-3 border-2 border-pink-100 rounded-xl focus:outline-none focus:border-pink-300 transition-colors"></textarea>
+                            </div>
+                            
+                            <button type="submit" 
+                                    class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg 
+                                           transition-all duration-300 hover:scale-[1.02] active:scale-95">
+                                Send Message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Footer -->
+        <footer class="bg-pink-800 text-white py-12">
+            <div class="max-w-6xl mx-auto px-4">
+                <div class="flex flex-col md:flex-row justify-between">
+                    <div class="mb-8 md:mb-0">
+                        <div class="flex items-center space-x-2 mb-4 bg-white px-3 py-3 rounded-lg">
+                            <img src="https://www.ukiukitadoku.com/build/images/logo-dark.png" alt="Logo" style="width: 150px;">
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                            <ul class="space-y-2">
+                                <li><a href="#home" class="text-pink-200 hover:text-white transition">Home</a></li>
+                                <li><a href="#about" class="text-pink-200 hover:text-white transition">About Us</a></li>
+                                <li><a href="#features" class="text-pink-200 hover:text-white transition">Features</a></li>
+                                <li><a href="#timeline" class="text-pink-200 hover:text-white transition">Timeline</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-lg font-semibold mb-4">Resources</h4>
+                            <ul class="space-y-2">
+                                <li><a href="#" class="text-pink-200 hover:text-white transition">Blog</a></li>
+                                <li><a href="#" class="text-pink-200 hover:text-white transition">Help Center</a></li>
+                                <li><a href="#" class="text-pink-200 hover:text-white transition">Privacy Policy</a></li>
+                                <li><a href="#" class="text-pink-200 hover:text-white transition">Terms of Service</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                          
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+    <script src="JS/animation.js"></script>
+    <script src="JS/nav.js"></script>
+</body>
+</html>
