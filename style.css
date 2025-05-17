@@ -7,16 +7,8 @@ h1, h2, h3, {
 p {
     font-family: 'Poppins', sans-serif!important;
 }
-#mobile-menu {
-  will-change: transform;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.sakura-bg {
-  background-image: url("/img/image.png");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-}
+
+
 .timeline-item::before {
   content: "";
   position: absolute;

@@ -1,0 +1,100 @@
+/* Base styles */
+:root {
+  --text-primary: #1F2937;  /* Gray 800 */
+  --text-secondary: #4B5563; /* Gray 600 */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F9FAFB; /* Gray 50 */
+  --bg-tertiary: #F3F4F6; /* Gray 100 */
+  --accent-primary: #DB2777; /* Pink 600 */
+  --accent-secondary: #F472B6; /* Pink 400 */
+  --accent-tertiary: #FCE7F3; /* Pink 100 */
+}
+
+/* Dark mode variables */
+.dark {
+  --text-primary: #F9FAFB; /* Gray 50 */
+  --text-secondary: #D1D5DB; /* Gray 300 */
+  --bg-primary: #111827; /* Gray 900 */
+  --bg-secondary: #1F2937; /* Gray 800 */
+  --bg-tertiary: #374151; /* Gray 700 */
+  --accent-primary: #EC4899; /* Pink 500 */
+  --accent-secondary: #F472B6; /* Pink 400 */
+  --accent-tertiary: #831843; /* Pink 900 */
+}
+
+/* Apply variables to elements */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.4s, color 0.4s;
+}
+
+/* Light mode - dengan background image */
+.bg-sakura {
+  /* Default: dengan background image */
+  background-image: url('/img/image.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* Dark mode - tanpa background image, hanya warna gelap */
+.dark .bg-sakura {
+  background-image: none; /* Hapus background image */
+  background-color: var(--bg-primary); /* Gunakan warna background dark */
+}
+.bg-nav {
+  /* Default: dengan background image */
+  background-color:var(--accent-tertiary);
+}
+
+/* Dark mode - tanpa background image, hanya warna gelap */
+.dark .bg-nav {
+  background-color: var(--bg-secondary); /* Gunakan warna background dark */
+}
+
+/* Dark mode specific overrides */
+.dark #about,
+.dark .bg-white {
+  background-color: var(--bg-secondary);
+}
+
+.dark h2,
+
+.dark h4 {
+  color: var(--text-primary);
+}
+
+.dark p,
+.dark a:not(.text-pink-500):not(.text-pink-600):not(.text-white) {
+  color: var(--text-secondary);
+}
+
+.dark .text-gray-700 {
+  color: var(--text-secondary);
+}
+
+.dark .bg-white.rounded-2xl,
+.dark .bg-white.p-8.rounded-2xl {
+  background-color: var(--bg-secondary);
+}
+
+.dark input, 
+.dark textarea {
+  background-color: var(--bg-tertiary);
+  border-color: var(--accent-tertiary);
+  color: var(--text-primary);
+}
+
+.dark label {
+  color: var(--text-primary);
+}
+
+/* Feature Cards Dark Mode */
+.dark .group.bg-white {
+  background-color: var(--bg-secondary);
+}
+
+.dark .text-gray-600 {
+  color: var(--text-secondary);
+}
